@@ -9,7 +9,6 @@ pipeline {
     stage('Check Out Code ') {
       steps {
         git(url: 'https://github.com/avishai201/NodeJS-EmptySiteTemplate.git', branch: 'master', changelog: true, poll: true)
-        cleanWs(cleanWhenSuccess: true, cleanWhenAborted: true, cleanWhenFailure: true)
       }
     }
 
@@ -35,13 +34,13 @@ fi'''
       parallel {
         stage('Package Code') {
           steps {
-            sh 'tar -czvf node.tar.gz .'
+            sh 'tar -czvf node.tar.gz *'
           }
         }
 
         stage('Notify Slack') {
           steps {
-            slackSend(token: 'WBoniVFZfbAefgOzyMSEscli', channel: 'int-project', color: '#3EA652', failOnError: true, blocks: '"${env.JOB_NAME} #${env.BUILD_NUMBER} - " + buildStatus + " Started By ${env.BUILD_USER} (${env.BUILD_URL})")')
+            slackSend(token: 'WBoniVFZfbAefgOzyMSEscli', channel: 'int-project', color: '#3EA652')
           }
         }
 
@@ -51,6 +50,7 @@ fi'''
     stage('Publish The Archive') {
       steps {
         archiveArtifacts 'node.tar.gz'
+        cleanWs(cleanWhenAborted: true, cleanWhenFailure: true, cleanWhenSuccess: true, cleanWhenNotBuilt: true, cleanWhenUnstable: true)
       }
     }
 
