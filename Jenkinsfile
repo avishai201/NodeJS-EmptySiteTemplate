@@ -9,6 +9,7 @@ pipeline {
     stage('Check Out Code ') {
       steps {
         git(url: 'https://github.com/avishai201/NodeJS-EmptySiteTemplate.git', branch: 'master', changelog: true, poll: true)
+        cleanWs(cleanWhenSuccess: true, cleanWhenAborted: true, cleanWhenFailure: true)
       }
     }
 
@@ -27,6 +28,29 @@ if [[ "x$?" == "x0" ]];
 then    echo good;
 else exit 1;
 fi'''
+      }
+    }
+
+    stage('Package Code') {
+      parallel {
+        stage('Package Code') {
+          steps {
+            sh 'tar -czvf node.tar.gz .'
+          }
+        }
+
+        stage('Notify Slack') {
+          steps {
+            slackSend(token: 'WBoniVFZfbAefgOzyMSEscli', channel: 'int-project', color: '#3EA652', failOnError: true, blocks: '"${env.JOB_NAME} #${env.BUILD_NUMBER} - " + buildStatus + " Started By ${env.BUILD_USER} (${env.BUILD_URL})")')
+          }
+        }
+
+      }
+    }
+
+    stage('Publish The Archive') {
+      steps {
+        archiveArtifacts 'node.tar.gz'
       }
     }
 
