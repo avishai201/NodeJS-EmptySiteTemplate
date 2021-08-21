@@ -40,7 +40,7 @@ fi'''
 
         stage('Notify Slack') {
           steps {
-            slackSend(token: 'WBoniVFZfbAefgOzyMSEscli', channel: 'int-project', color: '#3EA652')
+            slackSend(token: 'WBoniVFZfbAefgOzyMSEscli', channel: 'int-project', notifyCommitters: true, message: 'Build Success - NodeJS- EmptySiteTemplate ')
           }
         }
 
